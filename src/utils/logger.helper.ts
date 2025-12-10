@@ -5,11 +5,11 @@ export function LogStep(
     propertyKey: string,
     descriptor: PropertyDescriptor
 ) {
-    const originalMethod = descriptor.value;
+    const original = descriptor.value;
 
     descriptor.value = function (...args: any[]) {
-        action(`Executing: ${propertyKey} (${args.join(", ")})`);
-        return originalMethod.apply(this, args);
+        action(`Executing: ${propertyKey}(${args.join(", ")})`);
+        return original.apply(this, args);
     };
 
     return descriptor;

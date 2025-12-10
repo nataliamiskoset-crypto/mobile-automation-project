@@ -1,36 +1,45 @@
-class ProductPage {
-    private productsHeader: string;
-    private productAddToBasket: string;
-    private basket: string;
+import BasePage from "./base.page";
+import {logger} from "../../src/utils/logger";
+import {AppiumDriver} from "webdriverio";
+import {waitUntilElementGone} from "../../src/utils/waitUntilElementGone";
+import {retry} from "../../src/utils/retry";
 
-    constructor() {
-        // Inicjalizowanie selektorów na podstawie identyfikatorów zasobów lub nazw klas
-        this.productsHeader = 'android.widget.TextView[@text="PRODUCTS"]';
-        this.productAddToBasket = '//android.widget.TextView[@text="ADD TO CART"]';
-        this.basket = '//android.view.ViewGroup[@content-desc="test-Cart"]/android.view.ViewGroup/android.widget.ImageView';
+class HomePage extends BasePage {
+    private searchLoop: string;
+    private driver: AppiumDriver;
+    private missingApplicationsMessage: string;
+
+    constructor(driver: AppiumDriver) {
+        super()
+        this.driver = driver
+        this.searchLoop = '//android.widget.ImageButton[@content-desc="Search"]';
+        this.missingApplicationsMessage = '//android.widget.TextView[@resource-id="org.fdroid.fdroid:id/empty_state"]';
     }
 
-    // Metoda do klikania w przycisk "ADD TO CART" na podstawie indeksu
-    public async clickAddToCart(index: number) {
-        const selector = `(${this.productAddToBasket})[${index + 1}]`; // Dodanie 1 do indeksu, ponieważ XPath zaczyna się od 1
-        await this.click(selector); // Zakłada, że masz metodę do klikania elementów
+    public async clickSearchLoop(): Promise<void> {
+        await this.click(this.searchLoop);
     }
 
-    // Metoda do sprawdzania, czy strona z nagłówkiem produktów została załadowana
-    public async isProductsPageLoaded(): Promise<boolean> {
-        const headerDisplayed = await this.isElementDisplayed(this.productsHeader); // Zakłada, że masz metodę do sprawdzania widoczności elementów
-        return headerDisplayed;
+    public async open(): Promise<this> {
+        const isLoaded = await this.homePageIsLoaded();
+        if (!isLoaded) {
+            logger.warn("⚠️ HomePage was not loaded, which may affect the reliability of this test case.");
+        }
+        return this;
     }
 
-    // Przykładowe metody pomocnicze (musisz je zaimplementować zgodnie z tym, co masz w pozostałej części kodu)
-    private async click(selector: string) {
-        // Implementacja metody klikania na element
-    }
+    protected async homePageIsLoaded(): Promise<void> {
+        await retry(
+            async () => {
+                await waitUntilElementGone(this.missingApplicationsMessage);
+                return true;
+            },
+            (result) => result === true,
+            3,
+            500
+        );
 
-    private async isElementDisplayed(selector: string): Promise<boolean> {
-        // Implementacja metody sprawdzającej widoczność elementu
-        return true; // Zwróć rzeczywistą wartość w oparciu o implementację
-    }
+        logger.info("🏠 Home page is fully loaded.");    }
 }
 
-export default new ProductPage();
+export default HomePage;

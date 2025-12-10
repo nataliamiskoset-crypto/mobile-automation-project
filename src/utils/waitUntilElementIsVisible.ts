@@ -1,7 +1,7 @@
 import { waitUntil } from "./waitUntil";
 import {logger} from "./logger";
 
-export async function waitUntilElementGone(
+export async function waitUntilElementIsVisible(
     locator: string | WebdriverIO.Locator,
     options = {
         retries: 3,
@@ -9,19 +9,19 @@ export async function waitUntilElementGone(
         waitInterval: 300,
         onRetry: async () => {}
     }
-): Promise<boolean> {
+): Promise<WebdriverIO.Element> {
 
     const { retries, waitTimeout, waitInterval, onRetry } = options;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         const element = await $(locator);
-        const gone = await waitUntil(
-            async () => !(await element.isDisplayed().catch(() => false)),
+        const visible = await waitUntil(
+            async () => (await element.isDisplayed()),
             waitTimeout,
             waitInterval
         );
-        if (gone) {
-            return true;
+        if (visible) {
+            return element;
         }
         await onRetry();
     }

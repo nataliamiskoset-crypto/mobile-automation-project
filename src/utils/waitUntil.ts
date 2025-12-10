@@ -1,6 +1,6 @@
 import {logger} from "./logger";
 
-export async function waitUntilElementIsVisible(
+export async function waitUntil(
     condition: () => Promise<boolean>,
     timeout = 3000,
     interval = 300

@@ -1,41 +1,29 @@
-import {AppiumDriver} from 'webdriverio';
 import BasePage from "./base.page";
+import {LogStep} from "../../src/utils/logger.helper";
+import {AppiumDriver} from "webdriverio";
+import {waitUntilElementIsVisible} from "../../src/utils/waitUntilElementIsVisible";
+import {waitUntilElementsAreVisible} from "../../src/utils/waitUntilElemenstAreVisible";
 
-class NotificationsPage extends BasePage{
-    // Element selectors
-    private allowButton: string;
-    private dontAllowButton: string;
-    private permissionMessage: string;
-    private driver: AppiumDriver; // Dodaj właściwość drivera
+class NotificationsPage extends BasePage {
+
+    private searchField: string;
+    private items: string;
+    private driver: AppiumDriver;
 
     constructor(driver: AppiumDriver) {
         super();
-        this.driver = driver; // Inicjalizuj drivera
-        this.permissionMessage = '//android.widget.TextView[@resource-id="com.android.permissioncontroller:id/permission_message"]'
-        this.allowButton = '//android.widget.Button[@resource-id="com.android.permissioncontroller:id/permission_allow_button"]';
-        this.dontAllowButton = '//android.widget.Button[@resource-id="com.android.permissioncontroller:id/permission_deny_button"]';
+        this.driver = driver;
+        this.searchField = '//android.widget.EditText[@resource-id="org.fdroid.fdroid:id/search"]'
+        this.items = '//androidx.recyclerview.widget.RecyclerView[@resource-id="org.fdroid.fdroid:id/app_list"]/android.view.ViewGroup'
     }
 
-    public async getMessageText(): Promise<string> {
-        const messageElement =await this.driver.$(this.permissionMessage);
-        try {
-            await messageElement.waitForDisplayed({ timeout: 5000 }); // Czekaj maksymalnie 5 sekund
-            const text = await messageElement.getText();
-            return text;
-        } catch (error) {
-            return "Element not found.";
-        }
+    public async search(query: string): Promise<void> {
+        await this.enterTextAndSubmit(this.searchField, query);
     }
 
-    public async clickAllowButton(): Promise<void> {
-        const allowButtonElement = await this.driver.$(this.allowButton);
-        await allowButtonElement.click();
-    }
-
-    public async clickDontAllowButton(): Promise<void> {
-        const dontAllowButtonElement = await this.driver.$(this.dontAllowButton);
-        await dontAllowButtonElement.click();
+    public async countItemsInRecyclerView(): Promise<number> {
+        const elements = await waitUntilElementsAreVisible(this.items);
+        return elements.length;
     }
 }
-
 export default NotificationsPage;

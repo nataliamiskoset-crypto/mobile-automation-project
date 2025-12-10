@@ -1,0 +1,9 @@
+{
+  "platformName": "Android",
+  "hostname": "127.0.0.1",
+  "port": 4723,
+  "appium:app": "./apps/android/app.apk",
+  "appium:deviceName": "Android GoogleAPI Emulator",
+  "appium:platformVersion": "16.0",
+  "appium:automationName": "UiAutomator2"
+}
